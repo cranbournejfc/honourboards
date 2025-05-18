@@ -10,7 +10,7 @@
       padding: 0;
       font-family: 'Arial', sans-serif;
       height: 100%;
-      background: url('cranbourne_eagles_board_resized.png') no-repeat center top;
+      background: url('cranbourne_eagles_board_wide.png') no-repeat center top;
       background-size: contain;
       background-color: #5c3a1a;
       color: white;
@@ -18,72 +18,84 @@
     }
 
     .table-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: absolute;
-      top: 260px; /* Moved down by 30px */
+      top: 270px;
       left: 50%;
       transform: translateX(-50%);
-      width: calc(80% - 50px); /* Reduced width by 50px */
-      max-width: 1150px;
-      padding: 20px;
+      width: 80%;
+      max-width: 1200px;
+      height: 800px;
       overflow: hidden;
+      padding: 20px;
+      background: transparent;
+    }
+
+    .scrolling-wrapper {
+      padding-top: 0;
+      box-sizing: border-box;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 26px;
-      background: transparent;
+      background-color: transparent;
     }
 
     th, td {
       padding: 15px;
       border-bottom: 2px solid rgba(255, 255, 255, 0.3);
       text-align: center;
+      background-color: transparent;
     }
 
     th {
       color: gold;
       font-size: 28px;
       border-bottom: 3px solid gold;
+      position: sticky;
+      pointer-events: none;
+      top: 0;
+      background-color: rgba(0, 0, 0, 0.3);
+      z-index: 1;
     }
 
     tr:nth-child(even) {
       background-color: rgba(255, 255, 255, 0.05);
     }
-
-    tbody {
-      display: block;
-      max-height: 500px;
-      overflow-y: scroll;
-      scrollbar-width: none; /* Firefox */
-    }
-
-    tbody::-webkit-scrollbar {
-      display: none; /* Chrome, Safari */
-    }
-
-    thead, tbody tr {
-      display: table;
-      width: 100%;
-      table-layout: fixed;
-    }
   </style>
 </head>
 <body>
   <div class="table-container">
-    <table id="honourTable">
-      <thead>
-        <tr id="tableHeader"></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="scrolling-wrapper" id="scrollingWrapper">
+      <table id="honourTable">
+        <thead>
+          <tr id="tableHeader"></tr>
+        </thead>
+        <tbody><tr style='height: 1px;'></tr></tbody>
+      </table>
+    </div>
   </div>
 
   <script>
     const sheetID = '1KAS4HL8rQqr-Mupi6PZS3CWGHewnBSp5';
-    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+    const tabs = [
+      { gid: "0" },
+      { gid: "454109773" },
+      { gid: "780788986" },
+      { gid: "601913881" }
+    ];
+    let currentTab = 0;
 
-    function fetchHonourBoard() {
+    function loadBoard(gid) {
+      const url = "https://docs.google.com/spreadsheets/d/1KAS4HL8rQqr-Mupi6PZS3CWGHewnBSp5/gviz/tq?gid=0&tqx=out:json";
+
       fetch(url)
         .then(res => res.text())
         .then(data => {
@@ -93,7 +105,6 @@
           const theadRow = document.getElementById('tableHeader');
           const tbody = document.querySelector('#honourTable tbody');
 
-          // Set headers
           theadRow.innerHTML = '';
           headers.forEach(header => {
             const th = document.createElement('th');
@@ -101,7 +112,6 @@
             theadRow.appendChild(th);
           });
 
-          // Set rows
           tbody.innerHTML = '';
           rows.forEach(row => {
             const tr = document.createElement('tr');
@@ -112,28 +122,47 @@
             });
             tbody.appendChild(tr);
           });
+
+          resetScroll();
         })
         .catch(err => console.error('Error loading data:', err));
     }
 
-    function autoScrollTable() {
-      const tbody = document.querySelector('#honourTable tbody');
-      let scrollAmount = 0;
+    function cycleBoards() {
+      const tab = tabs[currentTab];
+      loadBoard(tab.gid);
+      currentTab = (currentTab + 1) % tabs.length;
+    }
 
-      function scrollStep() {
-        if (tbody.scrollTop < tbody.scrollHeight - tbody.clientHeight) {
-          tbody.scrollTop += 1;
-        } else {
-          tbody.scrollTop = 0;
+    function resetScroll() {
+      const wrapper = document.getElementById('scrollingWrapper');
+      wrapper.scrollTop = 0;
+        requestAnimationFrame(scrollStep);
+
+      const scrollHeight = wrapper.scrollHeight;
+      const duration = 120000; // 120 seconds
+      const startTime = performance.now();
+
+      function scrollStep(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = elapsed / duration;
+        if (progress >= 1) {
+          wrapper.scrollTop = 0;
+          requestAnimationFrame(scrollStep);
+        }
+        requestAnimationFrame(scrollStep);
+        else wrapper.scrollTop = progress * (scrollHeight - wrapper.clientHeight);
+
+        if (elapsed < duration) {
+          requestAnimationFrame(scrollStep);
         }
       }
 
-      setInterval(scrollStep, 50); // Adjust for speed
+      requestAnimationFrame(scrollStep);
     }
 
-    fetchHonourBoard();
-    setInterval(fetchHonourBoard, 30000);
-    setTimeout(autoScrollTable, 2000); // Wait for initial load
+    cycleBoards();
+    // Auto-cycle disabled
   </script>
 </body>
 </html>
