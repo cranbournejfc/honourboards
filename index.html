@@ -10,11 +10,19 @@
       padding: 0;
       font-family: 'Arial', sans-serif;
       height: 100%;
-      background: url('cranbourne_eagles_board_resized.png') no-repeat center top;
+      background: url('cranbourne_eagles_board_wide.png') no-repeat center top;
       background-size: contain;
       background-color: #5c3a1a;
       color: white;
       overflow: hidden;
+    }
+
+    .board-label {
+      text-align: center;
+      font-size: 40px;
+      color: gold;
+      margin-top: 150px;
+      text-shadow: 2px 2px 5px black;
     }
 
     .table-container {
@@ -25,15 +33,25 @@
       width: 80%;
       max-width: 1200px;
       height: 700px;
-      overflow-y: auto;
+      overflow: hidden;
       padding: 20px;
-      background-color: rgba(0, 0, 0, 0.3);
-      border-radius: 15px;
+      background: transparent;
+    }
+
+    .scrolling-wrapper {
+      height: 100%;
+      overflow-y: scroll;
+      animation: scrollTable 30s linear infinite;
       scrollbar-width: none;
     }
 
-    .table-container::-webkit-scrollbar {
+    .scrolling-wrapper::-webkit-scrollbar {
       display: none;
+    }
+
+    @keyframes scrollTable {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-100%); }
     }
 
     table {
@@ -65,20 +83,27 @@
   </style>
 </head>
 <body>
+  <div class="board-label" id="boardTitle">Honour Roll</div>
   <div class="table-container">
-    <table id="honourTable">
-      <thead>
-        <tr id="tableHeader"></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div class="scrolling-wrapper">
+      <table id="honourTable">
+        <thead>
+          <tr id="tableHeader"></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
   <script>
     const sheetID = '1KAS4HL8rQqr-Mupi6PZS3CWGHewnBSp5';
-    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+    const tabs = [{'gid': '0', 'label': 'Honour Roll'}, {'gid': '454109773', 'label': 'Club Best and Fairest'}, {'gid': '780788986', 'label': 'Spirit of Football Award'}, {'gid': '601913881', 'label': 'Best Club Person'}];
+    let currentTab = 0;
 
-    function fetchHonourBoard() {
+    function loadBoard(gid, label) {
+      const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?gid=${gid}&tqx=out:json`;
+      document.getElementById('boardTitle').textContent = label;
+
       fetch(url)
         .then(res => res.text())
         .then(data => {
@@ -111,8 +136,15 @@
         .catch(err => console.error('Error loading data:', err));
     }
 
-    fetchHonourBoard();
-    setInterval(fetchHonourBoard, 30000);
+    function cycleBoards() {
+      const tab = tabs[currentTab];
+      loadBoard(tab.gid, tab.label);
+      currentTab = (currentTab + 1) % tabs.length;
+    }
+
+    // Initial load
+    cycleBoards();
+    setInterval(cycleBoards, 60000); // Every 60 seconds
   </script>
 </body>
 </html>
