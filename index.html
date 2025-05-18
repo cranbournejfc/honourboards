@@ -10,7 +10,7 @@
       padding: 0;
       font-family: 'Arial', sans-serif;
       height: 100%;
-      background: url('cranbourne_eagles_board_wide.png') no-repeat center top;
+      background: url('cranbourne_eagles_board_resized.png') no-repeat center top;
       background-size: contain;
       background-color: #5c3a1a;
       color: white;
@@ -18,52 +18,32 @@
     }
 
     .table-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
       position: absolute;
-      top: 270px;
+      top: 230px;
       left: 50%;
       transform: translateX(-50%);
       width: 80%;
       max-width: 1200px;
-      height: 800px;
-      overflow: hidden;
       padding: 20px;
-      background: transparent;
-    }
-
-    .scrolling-wrapper {
-      padding-top: 0;
-      box-sizing: border-box;
-      height: 100%;
-      overflow: hidden;
-      position: relative;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 26px;
-      background-color: transparent;
+      background: transparent;
     }
 
     th, td {
       padding: 15px;
       border-bottom: 2px solid rgba(255, 255, 255, 0.3);
       text-align: center;
-      background-color: transparent;
     }
 
     th {
       color: gold;
       font-size: 28px;
       border-bottom: 3px solid gold;
-      position: sticky;
-      pointer-events: none;
-      top: 0;
-      background-color: rgba(0, 0, 0, 0.3);
-      z-index: 1;
     }
 
     tr:nth-child(even) {
@@ -73,29 +53,19 @@
 </head>
 <body>
   <div class="table-container">
-    <div class="scrolling-wrapper" id="scrollingWrapper">
-      <table id="honourTable">
-        <thead>
-          <tr id="tableHeader"></tr>
-        </thead>
-        <tbody><tr style='height: 1px;'></tr></tbody>
-      </table>
-    </div>
+    <table id="honourTable">
+      <thead>
+        <tr id="tableHeader"></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
   <script>
     const sheetID = '1KAS4HL8rQqr-Mupi6PZS3CWGHewnBSp5';
-    const tabs = [
-      { gid: "0" },
-      { gid: "454109773" },
-      { gid: "780788986" },
-      { gid: "601913881" }
-    ];
-    let currentTab = 0;
+    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
 
-    function loadBoard(gid) {
-      const url = "https://docs.google.com/spreadsheets/d/1KAS4HL8rQqr-Mupi6PZS3CWGHewnBSp5/gviz/tq?gid=0&tqx=out:json";
-
+    function fetchHonourBoard() {
       fetch(url)
         .then(res => res.text())
         .then(data => {
@@ -105,6 +75,7 @@
           const theadRow = document.getElementById('tableHeader');
           const tbody = document.querySelector('#honourTable tbody');
 
+          // Set headers
           theadRow.innerHTML = '';
           headers.forEach(header => {
             const th = document.createElement('th');
@@ -112,6 +83,7 @@
             theadRow.appendChild(th);
           });
 
+          // Set rows
           tbody.innerHTML = '';
           rows.forEach(row => {
             const tr = document.createElement('tr');
@@ -122,47 +94,12 @@
             });
             tbody.appendChild(tr);
           });
-
-          resetScroll();
         })
         .catch(err => console.error('Error loading data:', err));
     }
 
-    function cycleBoards() {
-      const tab = tabs[currentTab];
-      loadBoard(tab.gid);
-      currentTab = (currentTab + 1) % tabs.length;
-    }
-
-    function resetScroll() {
-      const wrapper = document.getElementById('scrollingWrapper');
-      wrapper.scrollTop = 0;
-        requestAnimationFrame(scrollStep);
-
-      const scrollHeight = wrapper.scrollHeight;
-      const duration = 120000; // 120 seconds
-      const startTime = performance.now();
-
-      function scrollStep(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = elapsed / duration;
-        if (progress >= 1) {
-          wrapper.scrollTop = 0;
-          requestAnimationFrame(scrollStep);
-        }
-        requestAnimationFrame(scrollStep);
-        else wrapper.scrollTop = progress * (scrollHeight - wrapper.clientHeight);
-
-        if (elapsed < duration) {
-          requestAnimationFrame(scrollStep);
-        }
-      }
-
-      requestAnimationFrame(scrollStep);
-    }
-
-    cycleBoards();
-    // Auto-cycle disabled
+    fetchHonourBoard();
+    setInterval(fetchHonourBoard, 30000);
   </script>
 </body>
 </html>
