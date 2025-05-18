@@ -17,14 +17,6 @@
       overflow: hidden;
     }
 
-    .board-label {
-      text-align: center;
-      font-size: 40px;
-      color: gold;
-      margin-top: 150px;
-      text-shadow: 2px 2px 5px black;
-    }
-
     .table-container {
       position: absolute;
       top: 230px;
@@ -58,13 +50,14 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 26px;
-      background: transparent;
+      background-color: transparent;
     }
 
     th, td {
       padding: 15px;
       border-bottom: 2px solid rgba(255, 255, 255, 0.3);
       text-align: center;
+      background-color: transparent;
     }
 
     th {
@@ -73,7 +66,7 @@
       border-bottom: 3px solid gold;
       position: sticky;
       top: 0;
-      background-color: rgba(0, 0, 0, 0.6);
+      background-color: rgba(0, 0, 0, 0.3);
       z-index: 1;
     }
 
@@ -83,7 +76,6 @@
   </style>
 </head>
 <body>
-  <div class="board-label" id="boardTitle">Honour Roll</div>
   <div class="table-container">
     <div class="scrolling-wrapper">
       <table id="honourTable">
@@ -97,12 +89,16 @@
 
   <script>
     const sheetID = '1KAS4HL8rQqr-Mupi6PZS3CWGHewnBSp5';
-    const tabs = [{'gid': '0', 'label': 'Honour Roll'}, {'gid': '454109773', 'label': 'Club Best and Fairest'}, {'gid': '780788986', 'label': 'Spirit of Football Award'}, {'gid': '601913881', 'label': 'Best Club Person'}];
+    const tabs = [
+      { gid: "0" },
+      { gid: "454109773" },
+      { gid: "780788986" },
+      { gid: "601913881" }
+    ];
     let currentTab = 0;
 
-    function loadBoard(gid, label) {
+    function loadBoard(gid) {
       const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?gid=${gid}&tqx=out:json`;
-      document.getElementById('boardTitle').textContent = label;
 
       fetch(url)
         .then(res => res.text())
@@ -138,7 +134,7 @@
 
     function cycleBoards() {
       const tab = tabs[currentTab];
-      loadBoard(tab.gid, tab.label);
+      loadBoard(tab.gid);
       currentTab = (currentTab + 1) % tabs.length;
     }
 
