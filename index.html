@@ -32,18 +32,8 @@
 
     .scrolling-wrapper {
       height: 100%;
-      overflow-y: scroll;
-      animation: scrollTable 30s linear infinite;
-      scrollbar-width: none;
-    }
-
-    .scrolling-wrapper::-webkit-scrollbar {
-      display: none;
-    }
-
-    @keyframes scrollTable {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(-100%); }
+      overflow: hidden;
+      position: relative;
     }
 
     table {
@@ -77,7 +67,7 @@
 </head>
 <body>
   <div class="table-container">
-    <div class="scrolling-wrapper">
+    <div class="scrolling-wrapper" id="scrollingWrapper">
       <table id="honourTable">
         <thead>
           <tr id="tableHeader"></tr>
@@ -109,7 +99,6 @@
           const theadRow = document.getElementById('tableHeader');
           const tbody = document.querySelector('#honourTable tbody');
 
-          // Set headers
           theadRow.innerHTML = '';
           headers.forEach(header => {
             const th = document.createElement('th');
@@ -117,7 +106,6 @@
             theadRow.appendChild(th);
           });
 
-          // Set rows
           tbody.innerHTML = '';
           rows.forEach(row => {
             const tr = document.createElement('tr');
@@ -128,6 +116,8 @@
             });
             tbody.appendChild(tr);
           });
+
+          resetScroll();
         })
         .catch(err => console.error('Error loading data:', err));
     }
@@ -138,9 +128,29 @@
       currentTab = (currentTab + 1) % tabs.length;
     }
 
-    // Initial load
+    function resetScroll() {
+      const wrapper = document.getElementById('scrollingWrapper');
+      wrapper.scrollTop = 0;
+
+      const scrollHeight = wrapper.scrollHeight;
+      const duration = 30000; // 30 seconds
+      const startTime = performance.now();
+
+      function scrollStep(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = elapsed / duration;
+        wrapper.scrollTop = progress * (scrollHeight - wrapper.clientHeight);
+
+        if (elapsed < duration) {
+          requestAnimationFrame(scrollStep);
+        }
+      }
+
+      requestAnimationFrame(scrollStep);
+    }
+
     cycleBoards();
-    setInterval(cycleBoards, 60000); // Every 60 seconds
+    setInterval(cycleBoards, 60000); // Cycle every 60 seconds
   </script>
 </body>
 </html>
