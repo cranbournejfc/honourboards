@@ -137,6 +137,7 @@
     function resetScroll() {
       const wrapper = document.getElementById('scrollingWrapper');
       wrapper.scrollTop = 0;
+        requestAnimationFrame(scrollStep);
 
       const scrollHeight = wrapper.scrollHeight;
       const duration = 120000; // 120 seconds
@@ -145,7 +146,11 @@
       function scrollStep(currentTime) {
         const elapsed = currentTime - startTime;
         const progress = elapsed / duration;
-        if (progress >= 1) wrapper.scrollTop = 0;
+        if (progress >= 1) {
+          wrapper.scrollTop = 0;
+          requestAnimationFrame(scrollStep);
+        }
+        requestAnimationFrame(scrollStep);
         else wrapper.scrollTop = progress * (scrollHeight - wrapper.clientHeight);
 
         if (elapsed < duration) {
