@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cranbourne Eagles Honour Board</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Arial', sans-serif;
+      height: 100%;
+      background-color: #5c3a1a;
+      color: white;
+      overflow: hidden;
+      position: relative;
+      background-image: url('https://cranbournejfc.github.io/honourboards/cranbourne_eagles_board_wide.png');
+      background-repeat: no-repeat;
+      background-position: center top;
+      background-size: contain;
+    }
+
+    .table-container {
+      position: relative;
+      top: 260px;
+      margin: 0 auto;
+      width: 90vw;
+      max-width: 1100px;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 26px;
+      background: transparent;
+    }
+
+    th, td {
+      padding: 15px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+      text-align: center;
+    }
+
+    th {
+      color: gold;
+      font-size: 28px;
+      border-bottom: 3px solid gold;
+    }
+
+    tr:nth-child(even) {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    tbody {
+      display: block;
+      max-height: 500px;
+      overflow-y: scroll;
+      scrollbar-width: none;
+    }
+
+    tbody::-webkit-scrollbar {
+      display: none;
+    }
+
+    thead, tbody tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+    }
+  </style>
+</head>
+<body>
+  <div class="table-container">
+    <table id="honourTable">
+      <thead>
+        <tr id="tableHeader"></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const sheetID = '1KAS4HL8rQqr-Mupi6PZS3CWGHewnBSp5';
+    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json`;
+
+    function fetchHonourBoard() {
+      fetch(url)
+        .then(res => res.text())
+        .then(data => {
+          const json = JSON.parse(data.substr(47).slice(0, -2));
+          const rows = json.table.rows;
+          const headers = json.table.cols.map(col => col.label);
+          const theadRow = document.getElementById('tableHeader');
+          const tbody = document.querySelector('#honourTable tbody');
+
+          theadRow.innerHTML = '';
+          headers.forEach(header => {
+            const th = document.createElement('th');
+            th.textContent = header;
+            theadRow.appendChild(th);
+          });
+
+          tbody.innerHTML = '';
+          rows.forEach(row => {
+            const tr = document.createElement('tr');
+            row.c.forEach(cell => {
+              const td = document.createElement('td');
+              td.textContent = cell?.v || '';
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(err => console.error('Error loading data:', err));
+    }
+
+    function autoScrollTable() {
+      const tbody = document.querySelector('#honourTable tbody');
+      function scrollStep() {
+        if (tbody.scrollTop < tbody.scrollHeight - tbody.clientHeight) {
+          tbody.scrollTop += 1;
+        } else {
+          tbody.scrollTop = 0;
+        }
+      }
+      setInterval(scrollStep, 50);
+    }
+
+    fetchHonourBoard();
+    setInterval(fetchHonourBoard, 30000);
+    setTimeout(autoScrollTable, 2000);
+  </script>
+</body>
+</html>
