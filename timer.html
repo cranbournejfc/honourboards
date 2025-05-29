@@ -36,6 +36,12 @@
 
   <h1>Countdown Timers</h1>
 
+  <!-- Hidden audio element for buzzer -->
+  <audio id="buzzer" preload="auto">
+    <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+    Your browser does not support the audio element.
+  </audio>
+
   <div class="timer" id="timer1">
     <h2>Timer 1</h2>
     <div>
@@ -100,6 +106,7 @@
       const hoursSel = timerEl.querySelector('.hours');
       const minutesSel = timerEl.querySelector('.minutes');
       const secondsSel = timerEl.querySelector('.seconds');
+      const buzzer = document.getElementById('buzzer');
 
       populateOptions(hoursSel, 23);
       populateOptions(minutesSel, 59);
@@ -107,7 +114,6 @@
 
       let interval = null;
       let remainingSeconds = 0;
-      let originalSeconds = 0;
 
       function updateDisplay() {
         const hrs = Math.floor(remainingSeconds / 3600);
@@ -122,11 +128,8 @@
         const hours = parseInt(hoursSel.value);
         const minutes = parseInt(minutesSel.value);
         const seconds = parseInt(secondsSel.value);
-        if (remainingSeconds === 0) {
-          remainingSeconds = hours * 3600 + minutes * 60 + seconds;
-          originalSeconds = remainingSeconds;
-        }
 
+        remainingSeconds = hours * 3600 + minutes * 60 + seconds;
         if (remainingSeconds <= 0) return;
 
         updateDisplay();
@@ -137,6 +140,7 @@
           if (remainingSeconds <= 0) {
             clearInterval(interval);
             interval = null;
+            buzzer.play(); // 🔔 Play buzzer when done
           }
         }, 1000);
       });
@@ -150,7 +154,6 @@
         clearInterval(interval);
         interval = null;
         remainingSeconds = 0;
-        originalSeconds = 0;
         display.textContent = "00:00:00";
         hoursSel.value = "0";
         minutesSel.value = "0";
