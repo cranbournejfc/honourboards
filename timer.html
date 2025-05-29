@@ -47,6 +47,7 @@
     <div class="buttons">
       <button class="start">Start</button>
       <button class="stop">Stop</button>
+      <button class="reset">Reset</button>
     </div>
   </div>
 
@@ -61,6 +62,7 @@
     <div class="buttons">
       <button class="start">Start</button>
       <button class="stop">Stop</button>
+      <button class="reset">Reset</button>
     </div>
   </div>
 
@@ -75,11 +77,12 @@
     <div class="buttons">
       <button class="start">Start</button>
       <button class="stop">Stop</button>
+      <button class="reset">Reset</button>
     </div>
   </div>
 
   <script>
-    // Populate select options
+    // Populate dropdown options
     function populateOptions(select, max) {
       for (let i = 0; i <= max; i++) {
         const option = document.createElement('option');
@@ -93,6 +96,7 @@
       const display = timerEl.querySelector('.display');
       const startBtn = timerEl.querySelector('.start');
       const stopBtn = timerEl.querySelector('.stop');
+      const resetBtn = timerEl.querySelector('.reset');
       const hoursSel = timerEl.querySelector('.hours');
       const minutesSel = timerEl.querySelector('.minutes');
       const secondsSel = timerEl.querySelector('.seconds');
@@ -103,6 +107,7 @@
 
       let interval = null;
       let remainingSeconds = 0;
+      let originalSeconds = 0;
 
       function updateDisplay() {
         const hrs = Math.floor(remainingSeconds / 3600);
@@ -112,12 +117,15 @@
       }
 
       startBtn.addEventListener('click', () => {
-        if (interval) return; // prevent multiple intervals
+        if (interval) return; // already running
 
         const hours = parseInt(hoursSel.value);
         const minutes = parseInt(minutesSel.value);
         const seconds = parseInt(secondsSel.value);
-        remainingSeconds = hours * 3600 + minutes * 60 + seconds;
+        if (remainingSeconds === 0) {
+          remainingSeconds = hours * 3600 + minutes * 60 + seconds;
+          originalSeconds = remainingSeconds;
+        }
 
         if (remainingSeconds <= 0) return;
 
@@ -137,9 +145,19 @@
         clearInterval(interval);
         interval = null;
       });
+
+      resetBtn.addEventListener('click', () => {
+        clearInterval(interval);
+        interval = null;
+        remainingSeconds = 0;
+        originalSeconds = 0;
+        display.textContent = "00:00:00";
+        hoursSel.value = "0";
+        minutesSel.value = "0";
+        secondsSel.value = "0";
+      });
     }
 
-    // Setup each timer
     document.querySelectorAll('.timer').forEach(setupTimer);
   </script>
 
