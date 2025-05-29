@@ -36,12 +36,13 @@
 
   <h1>Countdown Timers</h1>
 
-  <!-- Hidden audio element for buzzer -->
+  <!-- Use your custom buzzer -->
   <audio id="buzzer" preload="auto">
-    <source src="https://github.com/cranbournejfc/honourboards/blob/main/mixkit-electric-fence-alert-2969.wav" type="audio/wav">
+    <source src="mixkit-electric-fence-alert-2969.wav" type="audio/wav">
     Your browser does not support the audio element.
   </audio>
 
+  <!-- Timer 1 -->
   <div class="timer" id="timer1">
     <h2>Timer 1</h2>
     <div>
@@ -57,6 +58,7 @@
     </div>
   </div>
 
+  <!-- Timer 2 -->
   <div class="timer" id="timer2">
     <h2>Timer 2</h2>
     <div>
@@ -72,6 +74,7 @@
     </div>
   </div>
 
+  <!-- Timer 3 -->
   <div class="timer" id="timer3">
     <h2>Timer 3</h2>
     <div>
@@ -88,7 +91,6 @@
   </div>
 
   <script>
-    // Populate dropdown options
     function populateOptions(select, max) {
       for (let i = 0; i <= max; i++) {
         const option = document.createElement('option');
@@ -123,8 +125,7 @@
       }
 
       startBtn.addEventListener('click', () => {
-        if (interval) return; // already running
-
+        if (interval) return;
         const hours = parseInt(hoursSel.value);
         const minutes = parseInt(minutesSel.value);
         const seconds = parseInt(secondsSel.value);
@@ -140,7 +141,7 @@
           if (remainingSeconds <= 0) {
             clearInterval(interval);
             interval = null;
-            buzzer.play(); // 🔔 Play buzzer when done
+            buzzer.play(); // ✅ Play custom buzzer
           }
         }, 1000);
       });
